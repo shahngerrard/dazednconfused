@@ -52,7 +52,28 @@ body {
   height: 60px;
   background-color: #f5f5f5;
 }
+#div2 {
+	float: right;
+    width: 100px;
+    height: 100px;
+    border: 1px solid black;
+}
 </style>
+<script>
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.id);
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData("text");
+    ev.target.appendChild(document.getElementById(data));
+}
+</script>
 </head>
 
 
@@ -65,7 +86,8 @@ body {
  					<div class="span4">
     						<a href="pulpitrock.jpg" class="img-responsive">
       							<p></p> 
-      							<img class="center-block" src="pulpitrock.jpg" alt="Pulpit Rock" style="width:150px;height:150px">
+							<div id="div1" ondrop="drop(event)" ondragover="allowDrop(event)">
+      							<img id="drag1" class="center-block" src="dog.jpg" alt="Pulpit Rock" draggable="true" ondragstart="drag(event)" style="width:150px;height:150px">
     						</a>
   					</div>
 					<div class="span4">
@@ -107,7 +129,10 @@ body {
 		</div>
 	</div>
  					
-
+<div class="col-sm-8">
+      <div id="div2" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+       
+</div>
 
 <footer class="footer">
 		<nav class="navbar navbar-default">
@@ -131,128 +156,6 @@ body {
 
 
 
-
-
-
-
-
-
-<script type="text/javascript">
-	var apiKey = "bjta6lbqejkmpk9k";;
-	(function($){
-	$(document).ready(function(){
-		$('div#search_progress').hide();
-		/* action that occurs when the form is submitted - either through hitting the enter key
-		// or by clicking on Search
-		$("form#searchTrove").submit(function() {
-	    	
-	    	$('#search_progress').show(); 
-	    	//show the progress bar as a search has been initiated
-			/
-		    // Get the values from our search form
-		    var searchTerm = $("#searchTerm").val();
-		    // Set the search zone - alternatively you can set this using a form input
-		    var searchZone = "newspaper";
-		    var sortBy = $("#sortBy").val();
-		    
-		    /* 
-		    *	Construct the URL for the Trove Search API
-		    * 	http://api.trove.nla.gov.au/result? is the base URL required for accessing the
-TROVE API
-		    * 	Additional arguments are sent as key/value pairs separated by the & sign
-		    * 	key is the API key needed to access the API
-		    * 	encoding tells the API how to return the results - json or xml (default)
-		    * 	zone tells the API where to perform the search - book, picture, article, music,
-map, collection, newspaper, list or all can be used
-		    * 	sortby tells the API how to sort the results - datedesc, dateasc, relevance
-		    * 	q is the set of keywords to search on, alternatively you can use Indexes to
-refine the search terms (see the API documentation for how to use indexes & which zones support
-each one
-		    *	callback allows you to specify a function to process the response - even if you
-choose not to set one, you need to include the callback parameter
-		    * 	See the API documentation for other parameters you can use in the search string
-		    */ 
-		    var url = "http://api.trove.nla.gov.au/result?key=" 
-		        + apiKey + "&encoding=json&zone=" + searchZone 
-		        + "&sortby=" + sortBy
-		        + "&q=" + searchTerm + "&callback=?";
-		
-		    /*	
-		    * 	Perform the search using jQuery's getJSON method
-		    *	Requires the search URL
-		    */	
-		    console.log(url);
-		    	
-		    $.getJSON(url, function(data) {
-		    	// clear the HTML div that will display the results
-		        $('#output').empty();
-		        $('#search_progress').hide(); //hide the search bar because the search has been
-completed
-		        		        
-		        if (data.response.zone[0].records.article){
-		        	// For each result returned, call getArticleText to retrieve the transcribed
-		        	// text
-		            $.each(data.response.zone[0].records.article, getArticleText);
-		            // Output the search results in JSON format to the console, use developer
-		            // tools to see how the data is structured.
-		            console.log(data);
-		        }else{
-			        $('#output').append("<p>No search results found for"+searchTerm+"</p>");
-		        }
-				});
-			});
-			}
-			/**
-			* There is an issue with TROVE applications where the first search will result in
-nothing being returned
-			* To get around this, we perform an API call once after the page has loaded.
-			* Remaining calls return successfully (providing there are results to be returned 
-			**/
-			var urlFirst = "http://api.trove.nla.gov.au/result?key=" 
-		        + apiKey + "&encoding=json&zone=newspaper&q=brisbane&callback=?";
-			$.getJSON(urlFirst, function(data){
-				if(data.response.zone[0].records.article){
-					$('#output').append("<p>Ready...</p>");
-				}
-			});
-			}
-		});
-function getArticleText(index, item){
-	/*
-	* Construct the search URL
-	* Using the item ID, set the inclusions for the result - using the include parameter
-	*/
-	var articleURL = "http://api.trove.nla.gov.au/newspaper/"
-	+ item.id 
-	+ "?key="+apiKey
-	+ "&include=articletext,pdf&encoding=json&callback=?";
-	// Pull what values you can from the original result - article title & URL
-	var title = item.heading;
-	var url = item.troveUrl;
-	
-	// Perform the search
-	$.getJSON(encodeURI(articleURL), function(data){
-		// Create a div element
-		var info = document.createElement("div");
-		// Give it the Bootstrap class panel
-		$(info).addClass("panel");
-		// Add the article title as a link contained in a div
-		$(info).append("<div class='panel-heading'><a href='"
-			+url+"' alt='Link to Trove Record'>"+title
-			+"</a></div>");
-		// Add the article text returned in the result to a new div and construct the link to the
-		// printable PDF document from the article ID.
-		$(info).append("<div class='panel-body'>"
-			+data.article.articleText
-			+"<a href='http://trove.nla.gov.au/ndp/del/printArticlePdf/"
-			+data.article.id
-			+"' alt='Link to PDF article'>PDF of Article</a></div>");
-			//Add the result to the search results element
-		$("#output").append($(info));
-	});
-	}}
-}(jQuery));
-</script>
 
 </body>
 </html>
